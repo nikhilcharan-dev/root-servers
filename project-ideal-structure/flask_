@@ -1,0 +1,6 @@
+your_project/
+│
+├── app.py
+├── requirements.txt
+└── static/         # For images, CSS, JS
+└── templates/      # For HTML files (if using Jinja)
