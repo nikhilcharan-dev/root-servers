@@ -4,6 +4,12 @@ import User from "../models/user.js";
 
 
 const pingUserURLs = async () => {
+    const isCaching = await redis.get("cache:in_progress");
+    if (isCaching) {
+        console.log("[PING] Skipped: cache in progress");
+        return;
+    }
+
     const keys = await redis.keys("user:beta:*");
     const now = Date.now();
 
@@ -12,27 +18,57 @@ const pingUserURLs = async () => {
         if (!cached) continue;
 
         const user = JSON.parse(cached);
-        if (now >= new Date(user.nextPingAt).getTime() || 1) {
-            // Ping all URLs
+        console.log(`[PING] Checking user ${user._id}, next ping at ${new Date(user.nextPingAt).toISOString()}`);
+
+        if (now >= new Date(user.nextPingAt).getTime()) {
             for (const url of user.urls) {
                 try {
                     await axios.get(`http://${url}`);
-                    console.log(`Pinged ${url} for user ${key}`);
+                    console.log(`[PING] Pinged ${url}`);
                 } catch {
-                    console.log(`Failed to ping ${url}`);
+                    console.log(`[PING] Failed to ping ${url}`);
                 }
             }
 
-            // Calculate next ping time
             const nextPingAt = new Date(now + user.pingRange * 60 * 1000);
-
-            // Update Redis and MongoDB
             user.nextPingAt = nextPingAt;
 
             await redis.set(key, JSON.stringify(user), 'EX', 86400);
             await User.findByIdAndUpdate(user._id, { nextPingAt });
+
+            console.log(`[PING] Updated next ping for user ${user._id}`);
+        } else {
+            console.log(`[PING] Skipped user ${user._id}, next ping at ${new Date(user.nextPingAt).toISOString()}`);
         }
     }
 };
 
-export default pingUserURLs;
+
+const cacheUserUrls = async () => {
+    await redis.set("cache:in_progress", "1", 'EX', 60, 'NX');
+
+    try {
+        console.log(`[CACHE] Started at ${new Date().toISOString()}`);
+
+        const users = await User.find().lean();
+        for (const user of users) {
+            const key = `user:${user.worker}:${user._id}`;
+            await redis.set(key, JSON.stringify({
+                _id: user._id,
+                urls: user.urls,
+                pingRange: user.pingRange,
+                nextPingAt: user.nextPingAt,
+                worker: user.worker
+            }), 'EX', 86400);
+            console.log(`[CACHE] Updated cache for user ${user._id}`);
+        }
+
+        console.log(`[CACHE] Completed at ${new Date().toISOString()}`);
+    } catch (err) {
+        console.error("[CACHE] Error:", err.message);
+    } finally {
+        await redis.del("cache:in_progress");
+    }
+};
+
+export { cacheUserUrls, pingUserURLs };
