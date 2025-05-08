@@ -50,7 +50,7 @@ const cacheUserUrls = async () => {
     try {
         console.log(`[CACHE] Started at ${new Date().toISOString()}`);
 
-        const users = await User.find().lean();
+        const users = await User.find({ worker: 'alpha'}).lean();
         for (const user of users) {
             const key = `user:${user.worker}:${user._id}`;
             await redis.set(key, JSON.stringify({

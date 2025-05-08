@@ -5,7 +5,6 @@ import dotenv from 'dotenv';
 import connectDB from './config/db.js';
 import { cacheUserUrls, pingUserURLs } from './runner/runner.js';
 import cron from "node-cron";
-import * as path from "node:path";
 
 dotenv.config();
 
