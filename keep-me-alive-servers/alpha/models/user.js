@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import UrlSchema from "./url.js";
 
 const userSchema = new mongoose.Schema({
     username: {
@@ -18,20 +19,14 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    urls: [{ type: String }],
+    urls: {
+        type: [UrlSchema],
+        default: []
+    },
     worker: {
         type: String,
         required: true
     },
-    pingRange: {
-        type: Number,
-        required: true
-    },
-    nextPingAt: {
-        type: Date,
-        required: true
-    }
-
 }, { timestamps: true });
 
 const User = mongoose.model("user", userSchema);

@@ -3,8 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 
 import connectDB from './config/db.js';
-import { cacheUserUrls, pingUserURLs } from './runner/runner.js';
-import cron from "node-cron";
+import runners from './runner/runner.js';
 
 dotenv.config();
 
@@ -34,24 +33,10 @@ app.get('/', (req, res) => {
     res.send("<h1 style='text-align: center'>Beta Server is running</h1>");
 })
 
+app.use('/api/start', runners);
+
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, async () => {
     console.log(`Beta Server running on port: ${PORT}`);
     await connectDB();
-
-    console.log("[STARTUP] Running initial cacheUserUrls()");
-    await cacheUserUrls();
-    console.log("[STARTUP] Finished initial cacheUserUrls()");
-});
-
-cron.schedule("*/15 * * * *", async () => {
-    console.log("[CRON] Running cacheUserUrls()");
-    await cacheUserUrls();
-    console.log("[CRON] Finished cacheUserUrls()");
-});
-
-cron.schedule("* * * * *", async () => {
-    console.log("[CRON] Running pingUserURLs()");
-    await pingUserURLs();
-    console.log("[CRON] Finished pingUserURLs()");
 });
