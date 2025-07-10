@@ -1,9 +1,11 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import axios from "axios";
+import cron from "node-cron";
 
 import connectDB from './config/db.js';
-import runners from './runner/runner.js';
+import scheduler from './runner/runner.js';
 
 dotenv.config();
 
@@ -35,8 +37,25 @@ app.get('/', (req, res) => {
 
 app.use('/api/start', runners);
 
+app.get('/health', (req, res) => {
+    res.send('OK');
+});
+
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, async () => {
     console.log(`Beta Server running on port: ${PORT}`);
-    await connectDB();
-});
+    startServer();
+})
+
+const startServer = async () => {
+    try {
+        await connectDB();
+        await scheduler();
+    } catch (err) {
+        console.error('Error connecting to MongoDB or starting scheduler:', err);
+    }
+}
+
+cron.schedule("*/5 * * * *", async () => {
+    await axios.get(`${process.env.ALPHA_SERVER}/health`);
+})

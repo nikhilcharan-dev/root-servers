@@ -11,6 +11,7 @@ const UrlSchema = new mongoose.Schema({
         min: 5,
         max: 30,
     },
+    status: String
 })
 
 export default UrlSchema;
