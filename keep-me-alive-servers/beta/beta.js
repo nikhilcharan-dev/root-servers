@@ -35,7 +35,6 @@ app.get('/', (req, res) => {
     res.send("<h1 style='text-align: center'>Beta Server is running</h1>");
 })
 
-app.use('/api/start', runners);
 
 app.get('/health', (req, res) => {
     res.send('OK');
