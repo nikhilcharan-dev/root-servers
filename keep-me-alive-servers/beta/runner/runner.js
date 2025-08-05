@@ -14,18 +14,17 @@ async function createOrUpdateJob(user, url) {
         const existingJob = scheduledJobs.get(jobKey);
         existingJob.stop();
         scheduledJobs.delete(jobKey);
-        // console.log(`Rescheduled job for ${url.address}`);
+        console.log(`Rescheduled job for ${url.address}`);
     } else {
-        // console.log(`New job scheduled for ${url.address}`);
+        console.log(`New job scheduled for ${url.address}`);
     }
 
     const cronExp = convertToCron(url.pingFrequency);
 
     const task = cron.schedule(cronExp, async () => {
         try {
-            // console.log(`Pinging ${url.address}`);
+            console.log(`Pinging ${url.address}`);
             await axios.get(`https://${url.address}`);
-
             await User.updateOne(
                 { _id: user._id, 'urls._id': url._id },
                 { $set: { 'urls.$.status': 'UP' } }
@@ -54,9 +53,9 @@ async function reloadJobs() {
                     console.warn(`Missing data for URL entry, skipping`);
                     return;
                 }
-                activeJobKeys.add(url._id.toString());
                 // creating jbs
                 createOrUpdateJob(user, url);
+                activeJobKeys.add(url._id.toString());
             });
         });
 
@@ -83,5 +82,5 @@ export default async function scheduler() {
     setInterval(() => {
         console.log('Checking for updates in MongoDB...');
         reloadJobs();
-    }, 60 * 1000);
+    }, 1000);
 }
