@@ -1,9 +1,8 @@
 import User from '../models/user.js';
-import axios from 'axios';
 import cron from "node-cron";
 import express from "express";
 
-const router = express.Router();
+export const router = express.Router();
 
 let Users = [];
 let UpdatedUsers = [];
@@ -21,15 +20,19 @@ const start = async () => {
 
 const process = async () => {
     try {
+        let allURLS = [];
         Users.map((user) => {
-            user.urls.map(async (url) => {
-                console.log(`https://${url.address}`)
-                try { await axios.get(`https://${url}`); }
-                catch(err) {
-                    console.log(`Error while Pinging [${url}]`);
-                }
+            user.urls.map((url) => {
+                allURLS.push(`https://${url.address}`);
             })
         })
+
+        await Promise.all(
+            allURLS.map((url) => {
+                fetch(url)
+            })
+        );
+        console.log("Monitoring Done")
     } catch(err) {
         console.log(err);
     }
@@ -39,10 +42,10 @@ const checkUpdates = () => {
     Users = UpdatedUsers;
 }
 
-export default async function scheduler() {
+export const scheduler = async () => {
     console.log('Scheduler starting...');
     await start();
-    cron.schedule(convertToCron(1), async () => {
+    cron.schedule(convertToCron(5), async () => {
         checkUpdates();
         await process();
     })

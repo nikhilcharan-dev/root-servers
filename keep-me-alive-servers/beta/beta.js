@@ -5,7 +5,7 @@ import axios from "axios";
 import cron from "node-cron";
 
 import connectDB from './config/db.js';
-import scheduler from './runner/runner.js';
+import { router, scheduler } from './runner/runner.js';
 
 dotenv.config();
 
@@ -35,7 +35,7 @@ app.get('/', (req, res) => {
     res.send("<h1 style='text-align: center'>Beta Server is running</h1>");
 })
 
-
+app.use('/api/beta', router);
 app.get('/health', (req, res) => {
     res.status(200).json({
         status: 'ok'
