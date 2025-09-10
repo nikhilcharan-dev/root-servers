@@ -37,13 +37,15 @@ app.get('/', (req, res) => {
 
 
 app.get('/health', (req, res) => {
-    res.send('OK');
+    res.status(200).json({
+        status: 'ok'
+    })
 });
 
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, async () => {
     console.log(`Beta Server running on port: ${PORT}`);
-    startServer();
+    await startServer();
 })
 
 const startServer = async () => {
@@ -55,6 +57,8 @@ const startServer = async () => {
     }
 }
 
-cron.schedule("*/5 * * * *", async () => {
-    await axios.get(`${process.env.ALPHA_SERVER}/health`);
+cron.schedule("*/1 * * * *", async () => {
+    const res = await axios.get(`${process.env.ALPHA_SERVER}/health`);
+    console.log(res);
+    console.log(`Touched Alpha Server: [${res.data.status}]`);
 })
