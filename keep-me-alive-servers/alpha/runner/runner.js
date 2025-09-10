@@ -23,9 +23,10 @@ const process = async () => {
     try {
         Users.map((user) => {
             user.urls.map(async (url) => {
+                console.log(`https://${url.address}`)
                 try { await axios.get(`https://${url}`); }
                 catch(err) {
-                    console.log(`Error while Pinging [${url}]`, err);
+                    console.log(`Error while Pinging [${url}]`);
                 }
             })
         })
@@ -41,7 +42,7 @@ const checkUpdates = () => {
 export default async function scheduler() {
     console.log('Scheduler starting...');
     await start();
-    cron.schedule(convertToCron(5), async () => {
+    cron.schedule(convertToCron(1), async () => {
         checkUpdates();
         await process();
     })

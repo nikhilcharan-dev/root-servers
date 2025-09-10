@@ -59,6 +59,5 @@ const startServer = async () => {
 
 cron.schedule("*/1 * * * *", async () => {
     const res = await axios.get(`${process.env.ALPHA_SERVER}/health`);
-    console.log(res);
     console.log(`Touched Alpha Server: [${res.data.status}]`);
 })

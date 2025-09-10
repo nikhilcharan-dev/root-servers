@@ -58,6 +58,6 @@ const startServer = async () => {
 }
 
 cron.schedule("*/1 * * * *", async () => {
-    await axios.get(`${process.env.BETA_SERVER}/health`);
-    console.log("Touched Beta Server");
+    const res = await axios.get(`${process.env.BETA_SERVER}/health`);
+    console.log(`Touched Beta Server: [${res.data.status}]`);
 })
