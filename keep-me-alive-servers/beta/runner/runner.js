@@ -23,7 +23,7 @@ const process = async () => {
     try {
         Users.map((user) => {
             user.urls.map(async (url) => {
-                try { await axios.get(url); }
+                try { await axios.get(`https://${url}`); }
                 catch(err) {
                     console.log(`Error while Pinging [${url}]`, err);
                 }
@@ -35,7 +35,7 @@ const process = async () => {
 }
 
 const checkUpdates = () => {
-
+    Users = UpdatedUsers;
 }
 
 export default async function scheduler() {
